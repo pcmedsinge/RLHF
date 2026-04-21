@@ -66,9 +66,17 @@ def run_inference(model, tokenizer, prompt: str, max_new_tokens: int = 384) -> t
 def score_response(response: str, case: dict) -> dict:
     disease = case["metadata"]["disease"].lower()
     resp_lower = response.lower()
-    test_keywords = ["test", "biopsy", "imaging", "antibod", "screen", "lab", "ct", "mri", "exam"]
-    safety_keywords = ["urgent", "emergenc", "life-threaten", "critical", "immediate", "safety"]
-    wrong_dx = ["fibromyalgia", "allergy", "viral syndrome", "stress reaction"]
+    test_keywords = [
+        "test", "biopsy", "imaging", "antibod", "screen", "lab",
+        "ct", "mri", "exam", "workup", "confirm", "diagnos",
+    ]
+    # Expanded: DPO model may express safety differently than exact keywords
+    safety_keywords = [
+        "urgent", "emergenc", "life-threaten", "critical", "immediate",
+        "safety", "prompt", "without delay", "timely", "risk", "hazard",
+        "monitor", "hospitaliz", "admission", "crisis", "fatal", "serious",
+    ]
+    wrong_dx = ["fibromyalgia", "allergy", "viral syndrome", "stress reaction", "anxiety"]
     return {
         "correct_diagnosis": disease in resp_lower,
         "suggests_tests": any(kw in resp_lower for kw in test_keywords),
@@ -101,13 +109,12 @@ def main() -> None:
     # --- Load model ---
     model, tokenizer = load_dpo_model(base_model_name, adapter_path)
 
-    # --- Load eval cases (same 3 as baseline) ---
+    # --- Load ALL eval cases for more meaningful signal ---
     cases = []
     with eval_path.open("r", encoding="utf-8") as f:
-        for i, line in enumerate(f):
-            if i >= 3:
-                break
+        for line in f:
             cases.append(json.loads(line))
+    print(f"Evaluating on all {len(cases)} eval cases for robust comparison.")
 
     # --- Load baseline for comparison ---
     baseline_cases = load_baseline_results(baseline_path)

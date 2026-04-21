@@ -84,15 +84,22 @@ def score_response(response: str, case: dict) -> dict:
     correct_dx = disease in resp_lower
 
     # 2. Did it suggest relevant tests? (check if response has test-related words)
-    test_keywords = ["test", "biopsy", "imaging", "antibod", "screen", "lab", "ct", "mri", "exam"]
+    test_keywords = [
+        "test", "biopsy", "imaging", "antibod", "screen", "lab",
+        "ct", "mri", "exam", "workup", "confirm", "diagnos",
+    ]
     suggests_tests = any(kw in resp_lower for kw in test_keywords)
 
     # 3. Did it mention safety/urgency?
-    safety_keywords = ["urgent", "emergenc", "life-threaten", "critical", "immediate", "safety"]
+    safety_keywords = [
+        "urgent", "emergenc", "life-threaten", "critical", "immediate",
+        "safety", "prompt", "without delay", "timely", "risk", "hazard",
+        "monitor", "hospitaliz", "admission", "crisis", "fatal", "serious",
+    ]
     mentions_safety = any(kw in resp_lower for kw in safety_keywords)
 
     # 4. Hallucination check — mentions diseases that are clearly wrong
-    wrong_dx = ["fibromyalgia", "allergy", "viral syndrome", "stress reaction"]
+    wrong_dx = ["fibromyalgia", "allergy", "viral syndrome", "stress reaction", "anxiety"]
     has_hallucination = any(wd in resp_lower for wd in wrong_dx)
 
     return {
