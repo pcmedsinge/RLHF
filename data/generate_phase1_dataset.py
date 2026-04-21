@@ -94,7 +94,9 @@ def build_prompt(template: CaseTemplate, rng: random.Random) -> str:
     return (
         f"Synthetic case: A {age}-year-old {sex} presents with {symptom_blob}. "
         f"Recent findings: {lab_blob}. "
-        "Provide top differential diagnosis with concise clinical reasoning and next best tests."
+        "Provide: (1) top differential diagnosis with concise clinical reasoning, "
+        "(2) next best confirmatory tests, and "
+        "(3) any urgent safety concerns or complications to monitor."
     )
 
 
