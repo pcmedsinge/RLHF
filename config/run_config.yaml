@@ -16,8 +16,8 @@ training:
   per_device_train_batch_size: 1
   gradient_accumulation_steps: 8
   learning_rate: 0.000005
-  num_train_epochs: 1
-  beta: 0.1
+  num_train_epochs: 3
+  beta: 0.3
   output_dir: training/dpo_adapter
 
 lora:

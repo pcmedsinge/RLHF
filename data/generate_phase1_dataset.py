@@ -13,6 +13,8 @@ class CaseTemplate:
     labs: List[str]
     high_value_reasoning: List[str]
     common_misstep: str
+    safety_note: str          # disease-specific urgency sentence
+    next_tests: List[str]     # specific confirmatory tests
 
 
 TEMPLATES: List[CaseTemplate] = [
@@ -26,6 +28,8 @@ TEMPLATES: List[CaseTemplate] = [
             "Need malignancy screen because dermatomyositis can be paraneoplastic",
         ],
         common_misstep="Treat as allergy and delay autoimmune workup",
+        safety_note="Dysphagia poses an aspiration risk requiring prompt monitoring and possible early intervention.",
+        next_tests=["anti-Mi-2 antibodies", "EMG", "muscle biopsy", "CT chest/abdomen for malignancy"],
     ),
     CaseTemplate(
         disease="Myasthenia Gravis",
@@ -37,6 +41,8 @@ TEMPLATES: List[CaseTemplate] = [
             "Chest imaging is needed to evaluate for thymoma",
         ],
         common_misstep="Label as anxiety due to intermittent symptoms",
+        safety_note="Bulbar involvement carries serious risk of respiratory failure; monitor FVC and have emergency plan ready.",
+        next_tests=["repetitive nerve stimulation", "single-fiber EMG", "CT chest for thymoma", "anti-MuSK antibodies"],
     ),
     CaseTemplate(
         disease="Wilson Disease",
@@ -48,6 +54,8 @@ TEMPLATES: List[CaseTemplate] = [
             "Ophthalmic slit-lamp exam for Kayser-Fleischer rings is important",
         ],
         common_misstep="Treat only psychiatric symptoms and miss liver involvement",
+        safety_note="Untreated Wilson disease causes fatal hepatic and neurologic deterioration; early chelation is critical.",
+        next_tests=["slit-lamp exam for Kayser-Fleischer rings", "liver biopsy for copper quantification", "ATP7B gene mutation screen"],
     ),
     CaseTemplate(
         disease="Addison Disease",
@@ -59,6 +67,8 @@ TEMPLATES: List[CaseTemplate] = [
             "Urgency is high because adrenal crisis can be life-threatening",
         ],
         common_misstep="Treat as dehydration only without endocrine follow-up",
+        safety_note="Adrenal crisis is immediately life-threatening; hydrocortisone must be available for emergency administration.",
+        next_tests=["ACTH stimulation test", "morning serum cortisol", "plasma ACTH level", "adrenal CT"],
     ),
     CaseTemplate(
         disease="Acute Intermittent Porphyria",
@@ -70,6 +80,8 @@ TEMPLATES: List[CaseTemplate] = [
             "Avoid triggering drugs and consider hemin in severe attacks",
         ],
         common_misstep="Order repeated abdominal surgeries due to pain focus",
+        safety_note="Severe attacks risk respiratory paralysis; hospitalization and IV hemin should be arranged without delay.",
+        next_tests=["spot urine PBG during attack", "gene panel for HMBS mutation", "drug trigger review", "IV hemin arrangement"],
     ),
 ]
 
@@ -88,11 +100,12 @@ def build_prompt(template: CaseTemplate, rng: random.Random) -> str:
 
 def build_chosen(template: CaseTemplate) -> str:
     reasoning = " ".join(f"- {line}." for line in template.high_value_reasoning)
+    tests = ", ".join(template.next_tests)
     return (
         f"Most likely diagnosis: {template.disease}. "
         f"Reasoning: {reasoning} "
-        "This requires prompt evaluation and monitoring given the potential for serious complications. "
-        "Next steps: prioritize confirmatory testing, evaluate immediate safety risks, and document alternate differentials."
+        f"Safety concern: {template.safety_note} "
+        f"Recommended next steps: {tests}."
     )
 
 
