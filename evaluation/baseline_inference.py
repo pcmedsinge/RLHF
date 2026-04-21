@@ -63,12 +63,12 @@ def run_inference(model, tokenizer, prompt: str, max_new_tokens: int = 384) -> s
     return response, elapsed
 
 
-def load_eval_cases(eval_path: Path, n: int = 3):
-    """Load first n cases from the eval dataset."""
+def load_eval_cases(eval_path: Path, n: int = None):
+    """Load eval cases. If n is None, load all cases."""
     cases = []
     with eval_path.open("r", encoding="utf-8") as f:
         for i, line in enumerate(f):
-            if i >= n:
+            if n is not None and i >= n:
                 break
             cases.append(json.loads(line))
     return cases
@@ -123,9 +123,9 @@ def main():
     # --- Load model ---
     model, tokenizer = load_model()
 
-    # --- Load eval cases ---
-    cases = load_eval_cases(eval_path, n=3)
-    print(f"\nRunning baseline on {len(cases)} eval cases...\n")
+    # --- Load eval cases --- (all cases for fair comparison with DPO)
+    cases = load_eval_cases(eval_path, n=None)
+    print(f"\nRunning baseline on all {len(cases)} eval cases...\n")
     print("=" * 80)
 
     # --- Run inference ---

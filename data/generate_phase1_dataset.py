@@ -91,6 +91,7 @@ def build_chosen(template: CaseTemplate) -> str:
     return (
         f"Most likely diagnosis: {template.disease}. "
         f"Reasoning: {reasoning} "
+        "This requires prompt evaluation and monitoring given the potential for serious complications. "
         "Next steps: prioritize confirmatory testing, evaluate immediate safety risks, and document alternate differentials."
     )
 
