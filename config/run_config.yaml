@@ -1,14 +1,14 @@
 project:
   name: rlhf-clinical-reasoning
-  phase: phase-1
+  phase: phase-2
 
 model:
   base_model: mistralai/Mistral-7B-Instruct-v0.2
   quantization: 4bit
 
 dataset:
-  train_file: data/processed/phase1_train.jsonl
-  eval_file: data/processed/phase1_eval.jsonl
+  train_file: data/processed/phase2_train_approved.jsonl
+  eval_file: data/processed/phase2_eval_approved.jsonl
   min_pairs_for_phase1: 200
 
 training:
@@ -17,6 +17,16 @@ training:
   gradient_accumulation_steps: 8
   learning_rate: 5e-6
   num_train_epochs: 1
+  beta: 0.1
+  output_dir: training/dpo_adapter
+
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - q_proj
+    - v_proj
 
 inference:
   max_new_tokens: 384
