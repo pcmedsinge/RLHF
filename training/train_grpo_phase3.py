@@ -184,7 +184,7 @@ def main() -> None:
         num_train_epochs=g["num_train_epochs"],
         num_generations=g["num_generations"],       # 4 responses per prompt
         max_completion_length=g["max_completion_length"],
-        fp16=True,
+        bf16=True,               # L4 supports BFloat16 natively; fp16 conflicts with BF16 model dtype
         gradient_checkpointing=True,
         logging_steps=5,
         report_to="none",
