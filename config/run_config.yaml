@@ -40,7 +40,7 @@ grpo:
   learning_rate: 0.000005
   num_train_epochs: 3
   num_generations: 4          # responses generated per prompt before scoring
-  max_new_tokens: 256         # length of each generated response during training
+  max_completion_length: 256  # length of each generated response during training
   output_dir: training/grpo_adapter
 
 # Reward function weights (used in train_grpo_phase3.py)

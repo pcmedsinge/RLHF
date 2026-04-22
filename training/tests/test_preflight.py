@@ -134,8 +134,8 @@ check("grpo.num_train_epochs is int >= 1",
 check("grpo.num_generations is int >= 2",
       isinstance(g.get("num_generations"), int) and g.get("num_generations", 0) >= 2,
       "must be >= 2 for GRPO to compute group relative advantage")
-check("grpo.max_new_tokens is int > 0",
-      isinstance(g.get("max_new_tokens"), int) and g.get("max_new_tokens", 0) > 0)
+check("grpo.max_completion_length is int > 0",
+      isinstance(g.get("max_completion_length"), int) and g.get("max_completion_length", 0) > 0)
 
 rw = cfg.get("reward", {})
 check("reward.correct_diagnosis is float",

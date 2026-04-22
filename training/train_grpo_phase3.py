@@ -183,7 +183,7 @@ def main() -> None:
         learning_rate=g["learning_rate"],
         num_train_epochs=g["num_train_epochs"],
         num_generations=g["num_generations"],       # 4 responses per prompt
-        max_new_tokens=g["max_new_tokens"],
+        max_completion_length=g["max_completion_length"],
         fp16=True,
         gradient_checkpointing=True,
         logging_steps=5,
