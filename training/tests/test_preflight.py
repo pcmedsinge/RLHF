@@ -1,12 +1,13 @@
 """
-Pre-flight Tests — Phase 2 DPO
-================================
+Pre-flight Tests — Phase 2 DPO + Phase 3 GRPO
+===============================================
 Run BEFORE starting Jarvis to catch config, data, and type errors
 without spending any GPU money.
 
 Covers:
   - Config loads and all required fields exist
   - Learning rate and beta are float (not string)
+  - GRPO-specific fields present and valid types
   - Dataset files exist and have correct schema
   - Approved rows count meets minimum threshold
   - LoRA target modules are valid strings
@@ -49,7 +50,7 @@ except Exception as e:
     print("Cannot continue without valid config.")
     sys.exit(1)
 
-required_sections = ["project", "model", "dataset", "training", "lora", "inference"]
+required_sections = ["project", "model", "dataset", "training", "lora", "inference", "grpo", "reward"]
 for section in required_sections:
     check(f"section '{section}' exists", section in cfg)
 
@@ -121,17 +122,42 @@ for split_name, path in [("train", train_path), ("eval", eval_path)]:
         check(f"train has >= {MIN_APPROVED_TRAIN} rows", len(rows) >= MIN_APPROVED_TRAIN,
               f"got {len(rows)}")
 
-# ── 5. Output dir writeable ──────────────────────────────────────────────────
-print("\n[5] Output directory")
-output_dir = ROOT / t.get("output_dir", "training/dpo_adapter")
-try:
-    output_dir.mkdir(parents=True, exist_ok=True)
-    test_file = output_dir / ".write_test"
-    test_file.write_text("ok")
-    test_file.unlink()
-    check("output_dir is writeable", True)
-except Exception as e:
-    check("output_dir is writeable", False, str(e))
+# ── 5. GRPO config ───────────────────────────────────────────────────────────
+print("\n[5] GRPO config")
+g = cfg.get("grpo", {})
+g_lr = g.get("learning_rate")
+check("grpo.learning_rate is float",
+      isinstance(g_lr, float),
+      f"got type={type(g_lr).__name__} value={g_lr!r} — use 0.000005 not 5e-6")
+check("grpo.num_train_epochs is int >= 1",
+      isinstance(g.get("num_train_epochs"), int) and g.get("num_train_epochs", 0) >= 1)
+check("grpo.num_generations is int >= 2",
+      isinstance(g.get("num_generations"), int) and g.get("num_generations", 0) >= 2,
+      "must be >= 2 for GRPO to compute group relative advantage")
+check("grpo.max_new_tokens is int > 0",
+      isinstance(g.get("max_new_tokens"), int) and g.get("max_new_tokens", 0) > 0)
+
+rw = cfg.get("reward", {})
+check("reward.correct_diagnosis is float",
+      isinstance(rw.get("correct_diagnosis"), float))
+check("reward.mentions_safety is float",
+      isinstance(rw.get("mentions_safety"), float))
+check("reward.suggests_tests is float",
+      isinstance(rw.get("suggests_tests"), float))
+
+# ── 6. Output dir writeable ──────────────────────────────────────────────────
+print("\n[6] Output directories")
+output_dir_dpo  = ROOT / t.get("output_dir", "training/dpo_adapter")
+output_dir_grpo = ROOT / g.get("output_dir", "training/grpo_adapter")
+for label, odir in [("dpo output_dir", output_dir_dpo), ("grpo output_dir", output_dir_grpo)]:
+    try:
+        odir.mkdir(parents=True, exist_ok=True)
+        test_file = odir / ".write_test"
+        test_file.write_text("ok")
+        test_file.unlink()
+        check(f"{label} is writeable", True)
+    except Exception as e:
+        check(f"{label} is writeable", False, str(e))
 
 # ── Summary ──────────────────────────────────────────────────────────────────
 print(f"\n{'='*50}")
@@ -141,4 +167,4 @@ if failures:
         print(f"  - {f}")
     sys.exit(1)
 else:
-    print("PRE-FLIGHT PASSED — safe to run train_dpo_phase2.py on Jarvis.")
+    print("PRE-FLIGHT PASSED — safe to run train_grpo_phase3.py on Jarvis.")
